@@ -20,7 +20,7 @@ def get_label(name):
 
 def get_label_by_crc32(n):
     for k in cats:
-        if binascii.crc32(k) & 0xFFFFFFFFL == n:
+        if binascii.crc32(k) & '0xFFFFFFFFL' == n:
             return k
     return u'other'
 
@@ -56,3 +56,5 @@ def get_detail(y):
     ext = get_extension(bigfname).lower()
     y['category'] = get_category(ext)
     y['extension'] = ext
+
+

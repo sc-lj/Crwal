@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
-import urllib2, re, argparse, json, time
+import re, argparse, json, time
+import pymysql
+pymysql.install_as_MySQLdb()
 import MySQLdb as mdb
-import utils, traceback, Queue, socket
 
+import utils, traceback, socket
+from urllib.request import Request,urlopen
+from queue import Queue
 
 DB_HOST = '127.0.0.1'
 DB_PORT = '3306'
@@ -20,22 +24,22 @@ ERR_EX = 2  # 未知错误
 
 def getHtml(url, ref=None, reget=5):
     try:
-        request = urllib2.Request(url)
+        request = Request(url)
         request.add_header('User-Agent',
                            'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36')
         if ref:
             request.add_header('Referer', ref)
-        page = urllib2.urlopen(request, timeout=10)
+        page = urlopen(request, timeout=10)
         html = page.read()
     except:
         if reget >= 1:
             # 如果getHtml失败，则再次尝试5次
-            print 'getHtml error,reget...%d' % (6 - reget)
+            print('getHtml error,reget...%d' % (6 - reget))
             time.sleep(2)
             return getHtml(url, ref, reget - 1)
         else:
-            print 'request url:' + url
-            print 'failed to fetch html'
+            print('request url:' + url)
+            print('failed to fetch html')
             exit()
     else:
         return html
@@ -75,12 +79,12 @@ class Db(object):
             else:
                 rs = self.dbcurr.execute(sql)
             return rs
-        except Exception, e:
+        except Exception as e:
             if self.check_conn():
-                print 'execute error'
+                print('execute error')
                 traceback.print_exc()
             else:
-                print 'reconnect mysql'
+                print('reconnect mysql')
                 self.conn()
                 if args:
                     rs = self.dbcurr.execute(sql, args)
@@ -109,7 +113,7 @@ class BaiduPanSpider(object):
         self.got_files_count = 0
         self.got_follow_count = 0
         self.while_count = 0
-        self.spider_queue = Queue.Queue(maxsize=20)
+        self.spider_queue = Queue(maxsize=20)
         self.status = 'stop'
         self.errno = ERR_NO
         self.file_type_t = {'video': 0, 'image': 1, 'document': 2, 'music': 3, 'package': 4, 'software': 5,
@@ -135,7 +139,7 @@ class BaiduPanSpider(object):
         url = 'http://yun.baidu.com/pcloud/friend/gethotuserlist?type=1&from=feed&start=0&limit=24&channel=chunlei&clienttype=0&web=1'
         follows_json = json.loads(getHtml(url))
         if follows_json['errno'] != 0:
-            print u'failed to fetch hot users'
+            print(u'failed to fetch hot users')
             return False
         returns = []
         count = 0
@@ -155,10 +159,10 @@ class BaiduPanSpider(object):
                             'album_count': album_count})
 
         if count == 0:
-            print "got no hot users"
+            print("got no hot users")
             return False
         else:
-            print "success to fetched hot users: %d" % count
+            print("success to fetched hot users: %d" % count)
         return returns
 
     def getFans(self, uk, start=0, limit=24):
@@ -169,7 +173,7 @@ class BaiduPanSpider(object):
             uk, limit, start)
         follows_json = json.loads(getHtml(follows_url, uk))
         if follows_json['errno'] != 0:
-            print u'failed to fetch fens'
+            print(u'failed to fetch fens')
             return False
         total_count = follows_json['total_count']
         returns = []
@@ -197,8 +201,8 @@ class BaiduPanSpider(object):
         ref = 'http://yun.baidu.com/pcloud/friendpage?type=follow&uk=%d&self=1' % uk
         follows_json = json.loads(getHtml(follows_url, ref))
         if follows_json['errno'] != 0:
-            print 'getFollows errno:%d' % follows_json['errno']
-            print 'request_url:' + follows_url
+            print('getFollows errno:%d' % follows_json['errno'])
+            print('request_url:' + follows_url)
             if follows_json['errno'] == -55:
                 self.errno = ERR_REFUSE
             else:
@@ -229,8 +233,8 @@ class BaiduPanSpider(object):
         ref = 'http://yun.baidu.com/share/home?uk=%d&view=share' % uk
         sharelists_json = json.loads(getHtml(sharelists_url, ref))
         if (sharelists_json['errno'] != 0):
-            print 'getShareLists errno:%d' % sharelists_json['errno']
-            print 'request_url:' + sharelists_url
+            print('getShareLists errno:%d' % sharelists_json['errno'])
+            print('request_url:' + sharelists_url)
             if sharelists_json['errno'] == -55:
                 self.errno = ERR_REFUSE
             else:
@@ -298,10 +302,10 @@ class BaiduPanSpider(object):
                             'update_time': update_time, 'filecount': filecount, 'uk': uk})
 
         if count == 0:
-            print "get nothing"
+            print("get nothing")
             return False
         else:
-            print "success to fetched : %d" % count
+            print("success to fetched : %d" % count)
 
         if (start + count) < total_count:
             start = start + limit
@@ -337,7 +341,7 @@ class BaiduPanSpider(object):
         if self.spider_queue.empty():
             fetched_users = self.db.execute('SELECT * from spider_list ORDER BY weight DESC limit 0,20')
             if fetched_users <= 0:
-                print 'nothing to spider,spider_list is empty'
+                print('nothing to spider,spider_list is empty')
                 return False
             self.start = 'start'
             self.errno = ERR_NO
@@ -363,14 +367,14 @@ class BaiduPanSpider(object):
             share_user = self.spider_queue.get()
             # 爬取分享者的文件列表
             if not share_user['file_done']:
-                print '%d now spidering file ,%d  file fetched' % (share_user['uk'], share_user['file_fetched'])
+                print('%d now spidering file ,%d  file fetched' % (share_user['uk'], share_user['file_fetched']))
                 rs = self.getShareLists(share_user['uk'], share_user['file_fetched'])
                 if not rs:
-                    print 'uk:%d error to fetch files,try again later...' % share_user['uk']
+                    print('uk:%d error to fetch files,try again later...' % share_user['uk'])
                     return True
                 total_count, fetched_count, file_list = rs
                 total_fetched = share_user['file_fetched'] + fetched_count
-                print 'fetched_file_count:%d' % fetched_count
+                print('fetched_file_count:%d' % fetched_count)
                 if total_fetched >= total_count or total_count == 0:
                     share_user['file_done'] = 1  # 该分享者所有文件爬取完成
                 if total_count == 0:
@@ -411,14 +415,14 @@ class BaiduPanSpider(object):
 
             # 爬取完文件后在爬取订阅列表
             if share_user['follow_done'] == 0 and share_user['file_done'] == 1:
-                print '%d now spidering follow ,%d  follow fetched' % (share_user['uk'], share_user['follow_fetched'])
+                print('%d now spidering follow ,%d  follow fetched' % (share_user['uk'], share_user['follow_fetched']))
                 rs = self.getFollows(share_user['uk'], share_user['follow_fetched'])
                 if not rs:
-                    print 'error to fetch follows,try again later...'
+                    print('error to fetch follows,try again later...')
                     return
                 total_count, fetched_count, follow_list = rs
                 total_fetched = share_user['follow_fetched'] + fetched_count
-                print 'fetched_follow_count:%d' % fetched_count
+                print('fetched_follow_count:%d' % fetched_count)
                 if total_fetched >= total_count or total_count == 0:
                     share_user['follow_done'] = 1
                 if total_count == 0:
@@ -431,7 +435,7 @@ class BaiduPanSpider(object):
                             follow_count += 1
                             # 判断该用户是否已经在表中了
                             if self.db.execute('SELECT * FROM share_users WHERE uk=%s', (follow['follow_uk'],)) > 0:
-                                print 'uk:%d has already in share_user table' % follow['follow_uk']
+                                print('uk:%d has already in share_user table' % follow['follow_uk'])
                                 continue
                             time_stamp = int(time.time())
                             self.db.execute("INSERT INTO share_users (uk,user_name,avatar_url,intro,follow_count,album_count,\
@@ -454,7 +458,7 @@ class BaiduPanSpider(object):
                     else:
                         if share_user['follow_done'] == 1:
                             # 订阅者爬取完成，该分享者的任务完成，从待爬取列表中删除
-                            print 'delete follow fetched sid:%d from spider_list' % share_user['sid']
+                            print('delete follow fetched sid:%d from spider_list' % share_user['sid'])
                             self.db.execute("DELETE FROM spider_list WHERE sid=%s", (share_user['sid'],))
                         else:
                             self.db.execute("UPDATE spider_list set follow_fetched=%s,follow_done=%s WHERE sid=%s",
@@ -466,14 +470,14 @@ class BaiduPanSpider(object):
             if share_user['follow_done'] == 0:
                 self.spider_queue.put(share_user)
             else:
-                print '%d has done' % share_user['uk']
+                print('%d has done' % share_user['uk'])
                 del share_user
             time.sleep(SPIDER_INTERVAL)
 
-        print '-----------------Done------------------'
-        print 'while_count:%d' % self.while_count
-        print 'got_follow_count:%d' % self.got_follow_count
-        print 'got_files_count:%d' % self.got_files_count
+        print('-----------------Done------------------')
+        print('while_count:%d' % self.while_count)
+        print('got_follow_count:%d' % self.got_follow_count)
+        print('got_files_count:%d' % self.got_files_count)
         return True
 
     def stop(self):
@@ -492,14 +496,12 @@ if __name__ == "__main__":
         spider.seedUsers()
     else:
         while (1):
-            print 'start spider...'
+            print('start spider...')
             result = spider.startSpider()
             if not result:
-                print 'The spider is refused,5 mins later try again auto...'
+                print('The spider is refused,5 mins later try again auto...')
                 time.sleep(60 * 5)
             else:
-                print 'one worker queue id done'
+                print('one worker queue id done')
                 time.sleep(1)
-
-
 
