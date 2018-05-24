@@ -129,3 +129,5 @@ if __name__ == '__main__':
     generator = WeiboCookiesGenerator()
     cookies = generator.new_cookies('13467553219', 'trbnbl199')
     print(cookies)
+
+

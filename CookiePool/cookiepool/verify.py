@@ -134,3 +134,5 @@ if __name__ == '__main__':
     ydm = Yundama(YUNDAMA_USERNAME, YUNDAMA_PASSWORD, YUNDAMA_APP_ID, YUNDAMA_APP_KEY)
     result = ydm.identify(file='getimage.jpg')
     print(result)
+
+

@@ -27,3 +27,6 @@ class CookiesFactory():
 if __name__ == '__main__':
     factory = CookiesFactory()
     factory.produce('weibo', browser='Chrome')
+
+
+
