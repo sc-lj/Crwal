@@ -1,9 +1,9 @@
-# coding:utf-8
-
 import random
+
 import redis
-from cookiepool.config import *
-from cookiepool.error import *
+
+from cookiespool.config import *
+from cookiespool.error import *
 
 
 class RedisClient(object):
@@ -97,6 +97,7 @@ class CookiesRedisClient(RedisClient):
 
     def delete(self, key):
         try:
+            print('Delete', key)
             return self._db.delete(self._key(key))
         except:
             raise DeleteCookieError
@@ -111,6 +112,24 @@ class CookiesRedisClient(RedisClient):
             return self._db.get(random.choice(keys))
         except:
             raise GetRandomCookieError
+
+    def all(self):
+        """
+        获取所有账户, 以字典形式返回
+        :return:
+        """
+        try:
+            for key in self._db.keys('{domain}:{name}:*'.format(domain=self.domain, name=self.name)):
+                group = key.decode('utf-8').split(':')
+                if len(group) == 3:
+                    username = group[2]
+                    yield {
+                        'username': username,
+                        'cookies': self.get(username)
+                    }
+        except Exception as e:
+            print(e.args)
+            raise GetAllCookieError
 
     def count(self):
         """
@@ -182,14 +201,9 @@ if __name__ == '__main__':
     """
     # 测试
     conn = AccountRedisClient(name='weibo')
-    conn.set('14760253606', 'gmidy8470')
-    conn.set('14760253607', 'uoyuic8427')
-    conn.set('18459749258', 'rktfye8937')
-    conn.set('18459748505', 'astvar3647')
-    print(conn.get('18459748505'))
-    print(conn.keys())
+    conn2 = AccountRedisClient(name='mweibo')
+
+
     accounts = conn.all()
     for account in accounts:
-        print(account)
-
-
+        conn2.set(account['username'], account['password'])

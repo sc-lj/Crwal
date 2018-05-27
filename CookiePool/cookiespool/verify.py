@@ -1,9 +1,9 @@
-# coding:utf-8
+import time
 
 import requests
-import time
 from requests.exceptions import ConnectionError
-from cookiepool.config import *
+
+from cookiespool.config import *
 
 
 class Yundama():
@@ -70,6 +70,8 @@ class Yundama():
             if response.status_code == 200:
                 result = response.json()
                 print(result)
+                if 'ret' in result.keys() and result.get('ret') < 0:
+                    print(self.error(result.get('ret')))
                 if result.get('ret') == 0 and 'text' in result.keys():
                     return result.get('text')
                 else:
@@ -94,12 +96,13 @@ class Yundama():
         else:
             return None
         result = self.upload(files, timeout, code_type)
-        print(result)
+        if 'ret' in result.keys() and result.get('ret') < 0:
+            print(self.error(result.get('ret')))
         if result.get('text'):
+            print('验证码识别成功', result.get('text'))
             return result.get('text')
         else:
             return self.retry(result.get('cid'))
-
 
     def error(self, code):
         """
@@ -120,19 +123,17 @@ class Yundama():
             -2003: '验证码图片损坏',
             -2004: '上传验证码图片失败',
             -3001: '验证码ID不存在	',
-            -3002: '验证码正在识别',
+            -3002: '验证码还在识别',
             -3003: '验证码识别超时',
             -3004: '验证码看不清',
             -3005: '验证码报错失败',
             -4001: '充值卡号不正确或已使用',
             -5001: '注册用户失败'
         }
-        return map.get(code)
+        return '云打码' + map.get(code)
 
 
 if __name__ == '__main__':
     ydm = Yundama(YUNDAMA_USERNAME, YUNDAMA_PASSWORD, YUNDAMA_APP_ID, YUNDAMA_APP_KEY)
     result = ydm.identify(file='getimage.jpg')
     print(result)
-
-

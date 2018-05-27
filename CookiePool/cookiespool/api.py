@@ -1,8 +1,7 @@
-# coding:utf-8
-
 from flask import Flask, g
-from cookiepool.config import *
-from cookiepool.db import CookiesRedisClient, AccountRedisClient
+
+from cookiespool.config import *
+from cookiespool.db import *
 
 __all__ = ['app']
 
@@ -58,7 +57,4 @@ def count(name):
 
 
 if __name__ == '__main__':
-    app.run()
-
-
-
+    app.run(host='0.0.0.0')

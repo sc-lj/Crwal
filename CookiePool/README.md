@@ -1,4 +1,0 @@
-# CookiePool
-
-CookiePool
-

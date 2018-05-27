@@ -1,8 +1,6 @@
-# coding:utf-8
-
 import requests
 
-from cookiepool.db import AccountRedisClient
+from cookiespool.db import AccountRedisClient
 
 conn = AccountRedisClient(name='weibo')
 
@@ -24,5 +22,3 @@ def scan():
 
 if __name__ == '__main__':
     scan()
-
-

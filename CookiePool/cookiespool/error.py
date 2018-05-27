@@ -1,6 +1,3 @@
-# coding:utf-8
-
-
 class CookiePoolError(Exception):
     def __str__(self):
         return repr('Cookie Pool Error')
@@ -26,6 +23,11 @@ class GetRandomCookieError(CookiePoolError):
         return repr('Get Random Cookie Error')
 
 
+class GetAllCookieError(CookiePoolError):
+    def __str__(self):
+        return repr('Get All Cookie Error')
+
+
 class SetAccountError(CookiePoolError):
     def __str__(self):
         return repr('Set Account Error')
@@ -40,7 +42,7 @@ class GetAccountError(CookiePoolError):
     def __str__(self):
         return repr('Get Account Error')
 
+
 class GetAllAccountError(CookiePoolError):
     def __str__(self):
         return repr('Get All Account Error')
-
