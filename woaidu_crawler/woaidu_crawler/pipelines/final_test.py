@@ -25,6 +25,6 @@ class FinalTestPipeline(object):
         return pipe
     
     def process_item(self, item, spider):
-        print self.style.NOTICE("SUCCESS(item):" + item['original_url'])
+        print(self.style.NOTICE("SUCCESS(item):" + item['original_url']))
         #pprint(item)
         return item

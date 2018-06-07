@@ -4,10 +4,9 @@
 import os
 import time
 import hashlib
-import urlparse
 import shutil
 import urllib
-from urlparse import urlparse
+from urllib.parse import urlparse
 from scrapy import log
 from twisted.internet import defer
 from pprint import pprint 
@@ -27,7 +26,7 @@ class FileException(Exception):
         Exception.__init__(self, *args)
 
     def __str__(self):#####for usage: print e
-        print self.style.ERROR("ERROR(FileException): %s"%(Exception.__str__(self),))
+        print(self.style.ERROR("ERROR(FileException): %s"%(Exception.__str__(self),)))
         
         return Exception.__str__(self)
 

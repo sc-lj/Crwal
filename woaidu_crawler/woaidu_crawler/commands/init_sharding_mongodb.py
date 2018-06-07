@@ -112,17 +112,17 @@ MONGOD_COLOR=36 #cyan
 BOLD=True
 conn = None
 
-INDEX = {\
+INDEX = {
             #collection
-            'book_detail':\
-                {\
+            'book_detail':
+                {
                     #Unique indexes on sharded collections have to start with the shard key.
                     #You can have only one unique key in sharding configuration. 
                     (('book_name',ASCENDING),('author',ASCENDING)):{'name':'book_name_author'},
                     'book_name':{'name':'book_name'},
                     'author':{'name':'author'},
                     'alias_name':{'name':'alias_name'},
-                }\
+                }
         }
 
 # defaults -- can change on command line
@@ -158,7 +158,7 @@ for x in sys.argv[1:]:
     if opt[0].startswith('--'):
         opt[0] = opt[0][2:].lower()
         if opt[0] == 'help':
-            print sys.argv[0], '[--help] [--chunksize=200] [--port=27017] [--path=/where/is/mongod] [collection=key]'
+            print(sys.argv[0], '[--help] [--chunksize=200] [--port=27017] [--path=/where/is/mongod] [collection=key]')
             sys.exit()
         elif opt[0] == 'chunksize':
             CHUNK_SIZE = int(opt[1])
@@ -233,10 +233,8 @@ def waitfor(proc, port):
             s.close()
 
     #extra prints to make line stand out
-    print
-    print proc.prefix, ascolor(INVERSE, 'failed to start')
-    print
-    
+    print(proc.prefix, ascolor(INVERSE, 'failed to start'))
+
     sleep(1)
     killAllSubs()
     sys.exit(1)
@@ -252,10 +250,10 @@ def printer():
             while select([file], [], [], 0)[0]:
                 line = file.readline().rstrip()
                 if line:
-                    print fds[file].prefix, line
+                    print(fds[file].prefix, line)
                 else:
                     if fds[file].poll() is not None:
-                        print fds[file].prefix, ascolor(INVERSE, 'EXITED'), fds[file].returncode
+                        print(fds[file].prefix, ascolor(INVERSE, 'EXITED'), fds[file].returncode)
                         del fds[file]
                         break
                 break
@@ -319,9 +317,9 @@ AFTER_SETUP()
 # just to be safe
 sleep(2)
 
-print '*** READY ***'
-print 
-print 
+print('*** READY ***')
+print()
+print ()
 
 try:
     printer_thread.join()

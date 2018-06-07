@@ -22,7 +22,7 @@ class NofilesDrop(DropItem):
         DropItem.__init__(self, *args)
 
     def __str__(self):#####for usage: print e
-        print self.style.ERROR("DROP(NofilesDrop):" + self.original_url)
+        print(self.style.ERROR("DROP(NofilesDrop):" + self.original_url))
 
         return DropItem.__str__(self)
 

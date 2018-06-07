@@ -30,7 +30,7 @@ class NofilesDrop(DropItem):
         DropItem.__init__(self, *args)
 
     def __str__(self):#####for usage: print e
-        print self.style.ERROR("DROP(NofilesDrop):" + self.original_url)
+        print(self.style.ERROR("DROP(NofilesDrop):" + self.original_url))
 
         return DropItem.__str__(self)
 
@@ -54,7 +54,7 @@ class MongodbBookFilesStore(FSFilesStore):
             self.db = client[shard_db]
             self.fs = gridfs.GridFS(self.db,shard_gridfs_collection)
         except Exception as e:
-            print self.style.ERROR("ERROR(MongodbBookFilesStore): %s"%(str(e),))
+            print(self.style.ERROR("ERROR(MongodbBookFilesStore): %s"%(str(e),)))
             traceback.print_exc()
     
     def persist_file(self, key, file_content, info, filename):
