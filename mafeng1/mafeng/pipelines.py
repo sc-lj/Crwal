@@ -45,13 +45,13 @@ class MafengMongoPipline():
         elif isinstance(item,MafengItem_hotel):
             collection='hotel'
         else:
-            print 'undefine item'
+            print('undefine item')
             return item
 
         try:
             self.db[collection].insert(dict(item))
             return item
-        except Exception,e:
+        except Exception as e:
             return item
 
     def close_spider(self,spider):
